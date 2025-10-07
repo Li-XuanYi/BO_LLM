@@ -1,0 +1,164 @@
+# 三段式充电LLMBO优化配置文件
+# 基于论文研究结果的最优配置
+
+# LLM API配置
+llm:
+  api_key: "sk-84ac2d321cf444e799ddc9db79c02e92"
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  
+  # 模型选择（基于性价比）
+  model: "qwen-plus"
+  
+  # 各阶段Temperature配置
+  temperature:
+    warm_start: 0.9      # 高多样性，广泛探索
+    surrogate: 0.5       # 精确物理理解
+    sampling_early: 0.7  # 早期探索
+    sampling_mid: 0.6    # 中期平衡
+    sampling_late: 0.5   # 后期利用
+  
+  # Token限制
+  max_tokens:
+    warm_start: 3000
+    surrogate: 2500
+    sampling: 2000
+
+# 贝叶斯优化配置
+bayesian_optimization:
+  # 初始采样点数
+  init_points: 8        # 三段式参数更多，增加初始点
+  
+  # 优化迭代次数
+  n_iter: 40            # 增加迭代次数以充分探索
+  
+  # Acquisition Function类型
+  acquisition_type: 'PI'  # 论文推荐用于快充优化
+  
+  # PI参数
+  xi: 0.01
+  
+  # LCB参数
+  beta: 4.0
+  
+  # 候选点数量
+  n_candidates: 1500    # 参数空间更大，增加候选点
+  
+  # 参数敏感性分析
+  use_sensitivity: true
+  
+  # 随机种子
+  random_state: 42
+
+# 三段式充电参数边界
+parameter_bounds:
+  current1:
+    min: 5.0
+    max: 6.5
+    description: "第一段充电电流 (A) - 高电流快充"
+  
+  charging_number1:
+    min: 8
+    max: 15
+    description: "第一次切换周期数"
+  
+  current2:
+    min: 3.5
+    max: 5.5
+    description: "第二段充电电流 (A) - 中等电流"
+  
+  charging_number2:
+    min: 15
+    max: 25
+    description: "第二次切换周期数"
+  
+  current3:
+    min: 2.0
+    max: 3.5
+    description: "第三段充电电流 (A) - 低电流涓流"
+
+# 约束条件
+constraints:
+  voltage_max: 4.2      # 最大电压 (V)
+  temp_max: 309         # 最大温度 (K) = 36°C
+  target_soc: 0.8       # 目标SOC
+
+# Latin Hypercube Sampling配置
+lhs:
+  enabled: true
+  fallback_when_llm_fails: true
+
+# 多样性选择配置
+diversity_selection:
+  method: 'maximin'
+  enabled: true
+
+# 参数敏感性分析配置
+sensitivity_analysis:
+  method: 'morris'
+  threshold_high: 0.4
+  threshold_low: 0.2
+  min_samples: 5        # 三段式需要更多样本
+
+# 复合核函数配置
+composite_kernel:
+  gamma_min: 0.5
+  gamma_max: 2.0
+  gamma_default: 1.0
+  
+  # 长度尺度范围（三段式）
+  length_scale_ranges:
+    current1: [0.3, 0.8]
+    charging_number1: [1.0, 2.0]
+    current2: [0.4, 0.9]
+    charging_number2: [1.5, 2.5]
+    current3: [0.5, 1.0]
+
+# 可视化配置
+visualization:
+  dpi: 300
+  format: 'png'
+  current_smooth_window: 5
+  show_raw_current: true
+  
+  # 颜色方案
+  colormap:
+    convergence: 'viridis'
+    parameters: 'plasma'
+    temperature: 'coolwarm'
+  
+  # 三段式充电阶段标注
+  stage_markers:
+    stage1_color: '#e74c3c'  # 红色 - 高电流
+    stage2_color: '#3498db'  # 蓝色 - 中电流
+    stage3_color: '#2ecc71'  # 绿色 - 低电流
+    marker_style: ':'
+    marker_width: 2
+
+# 论文参考协议（用于对比测试）
+reference_protocols:
+  protocol_A:
+    current1: 5.92
+    charging_number1: 10
+    current2: 4.92
+    charging_number2: 20
+    current3: 3.00
+    charging_time_min: 48
+    temp_rise_K: 6.69
+  
+  protocol_B:
+    current1: 5.34
+    charging_number1: 12
+    current2: 4.56
+    charging_number2: 20
+    current3: 3.00
+    charging_time_min: 52
+    temp_rise_K: 5.89
+  
+  applied_energy_optimal:
+    description: "Applied Energy 307 (2022) 最优三段式"
+    current1: 6.0
+    charging_number1: 12
+    current2: 4.2
+    charging_number2: 22
+    current3: 3.0
+    charging_time_s: 1043.5
