@@ -1,0 +1,10 @@
+{
+  "best_time": 47.0,
+  "best_params": {
+    "charging_number": 14.286632564893688,
+    "current1": 4.539472070068824,
+    "current2": 2.9962665814709695
+  },
+  "elapsed_time": 1632.100964307785,
+  "n_evaluations": 30
+}

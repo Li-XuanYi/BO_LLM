@@ -1,0 +1,14 @@
+{
+  "timestamp": "20251004_233316",
+  "best_params": {
+    "current1": 6.0,
+    "charging_number1": 9.0,
+    "current2": 4.8,
+    "charging_number2": 18.0,
+    "current3": 3.2
+  },
+  "best_time_min": 6.25,
+  "elapsed_time": 45.061405658721924,
+  "protocol_A_time_min": 250.0,
+  "improvement_vs_A": 97.5
+}
